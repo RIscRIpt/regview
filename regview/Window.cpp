@@ -119,8 +119,8 @@ void Window::PopulateValues(TreeNode ^node) {
     const int maxNameSize = 1024;
     const int maxDataSize = 1024;
 
-    TCHAR *name = (TCHAR*)new char[maxNameSize];
-    BYTE *dataBuffer = new BYTE[maxDataSize];
+    TCHAR name[maxNameSize] = { 0 };
+    BYTE dataBuffer[maxDataSize] = { 0 };
 
     for(DWORD dwIndex = 0; ; dwIndex++) {
         DWORD type;
@@ -149,7 +149,6 @@ void Window::PopulateValues(TreeNode ^node) {
         }
     }
 break_for:
-    delete[] name;
 
     CloseKey(hKey);
 }
