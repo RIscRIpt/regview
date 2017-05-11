@@ -164,17 +164,36 @@ String^ Window::RegTypeToString(DWORD type) {
     return REG_TYPE_NAMES[type];
 }
 
+template<typename T>
+array<T>^ u2m(T *data, size_t size) {
+    array<T> ^a = gcnew array<T>(size);
+    Marshal::Copy((IntPtr)data, a, 0, size);
+    return a;
+}
+
+List<String^>^ toArrayOfStrings(BYTE *data) {
+    auto strings = gcnew List<String^>();
+    do {
+        strings->Add(gcnew String((LPTSTR)data));
+        data += strings[strings->Count - 1]->Length;
+    } while(*data);
+    return strings;
+}
+
 String^ Window::RegDataToString(DWORD type, BYTE *data, SIZE_T length) {
     switch(type) {
     default:
     case REG_NONE:
-        return "{ NONE }";
+        return "";
     case REG_SZ:
     case REG_EXPAND_SZ:
     case REG_LINK:
         return gcnew String((LPTSTR)data, 0, length);
+    case REG_RESOURCE_LIST:
+    case REG_FULL_RESOURCE_DESCRIPTOR:
+    case REG_RESOURCE_REQUIREMENTS_LIST:
     case REG_BINARY:
-        return "{ BINARY }";
+        return BitConverter::ToString(u2m(data, length))->Replace("-", " ");
     case REG_DWORD:
         return Convert::ToString((int)*(DWORD*)data);
     case REG_DWORD_BIG_ENDIAN:
@@ -185,12 +204,7 @@ String^ Window::RegDataToString(DWORD type, BYTE *data, SIZE_T length) {
             (data[3] << 0)
         );
     case REG_MULTI_SZ:
-        return "{ LIST }";
-        break;
-    case REG_RESOURCE_LIST:
-    case REG_FULL_RESOURCE_DESCRIPTOR:
-    case REG_RESOURCE_REQUIREMENTS_LIST:
-        return "{ UNSUPPORTED RESOURCE TYPE }";
+        return String::Join(", ", toArrayOfStrings(data));
     case REG_QWORD:
         return Convert::ToString((long long)*(QWORD*)data);
         break;
