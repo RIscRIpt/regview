@@ -118,7 +118,7 @@ namespace regview {
             this->regTree->HideSelection = false;
             this->regTree->Location = System::Drawing::Point(0, 0);
             this->regTree->Name = L"regTree";
-            this->regTree->Size = System::Drawing::Size(160, 446);
+            this->regTree->Size = System::Drawing::Size(160, 353);
             this->regTree->TabIndex = 0;
             this->regTree->BeforeCollapse += gcnew System::Windows::Forms::TreeViewCancelEventHandler(this, &Window::regTree_BeforeCollapse);
             this->regTree->BeforeExpand += gcnew System::Windows::Forms::TreeViewCancelEventHandler(this, &Window::regTree_BeforeExpand);
@@ -140,7 +140,7 @@ namespace regview {
             // 
             this->splitContainer1->Panel2->Controls->Add(this->regValues);
             this->splitContainer1->Panel2MinSize = 0;
-            this->splitContainer1->Size = System::Drawing::Size(346, 446);
+            this->splitContainer1->Size = System::Drawing::Size(561, 353);
             this->splitContainer1->SplitterDistance = 160;
             this->splitContainer1->TabIndex = 1;
             // 
@@ -158,7 +158,7 @@ namespace regview {
             this->regValues->MultiSelect = false;
             this->regValues->Name = L"regValues";
             this->regValues->ShowGroups = false;
-            this->regValues->Size = System::Drawing::Size(182, 446);
+            this->regValues->Size = System::Drawing::Size(397, 353);
             this->regValues->Sorting = System::Windows::Forms::SortOrder::Ascending;
             this->regValues->TabIndex = 0;
             this->regValues->UseCompatibleStateImageBehavior = false;
@@ -180,7 +180,7 @@ namespace regview {
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-            this->ClientSize = System::Drawing::Size(346, 446);
+            this->ClientSize = System::Drawing::Size(561, 353);
             this->Controls->Add(this->splitContainer1);
             this->Name = L"Window";
             this->Text = L"regview";
