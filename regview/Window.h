@@ -20,9 +20,8 @@ namespace regview {
 		Window(void)
 		{
 			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
+
+            regTree->Sorted = true;
 
             HKEY_ROOTS = gcnew Dictionary<String^, IntPtr>();
             HKEY_ROOTS->Add(L"HKEY_CLASSES_ROOT", IntPtr(HKEY_CLASSES_ROOT));

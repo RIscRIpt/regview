@@ -122,10 +122,29 @@ void Window::PopulateValues(TreeNode ^node) {
     TCHAR name[maxNameSize] = { 0 };
     BYTE dataBuffer[maxDataSize] = { 0 };
 
+    DWORD type;
+    DWORD nameLength = maxNameSize;
+    DWORD dataBufferSize = maxDataSize;
+
+    //result = RegQueryValueEx(
+    //    hKey,
+    //    NULL,
+    //    NULL,
+    //    &type,
+    //    dataBuffer,
+    //    &dataBufferSize
+    //);
+    //if(result == ERROR_SUCCESS) {
+    //    PopulateValue(
+    //        L"(Default)",
+    //        RegTypeToString(type),
+    //        RegDataToString(type, dataBuffer, dataBufferSize)
+    //    );
+    //}
+
     for(DWORD dwIndex = 0; ; dwIndex++) {
-        DWORD type;
-        DWORD nameLength = maxNameSize;
-        DWORD dataBufferSize = maxDataSize;
+        nameLength = maxNameSize;
+        dataBufferSize = maxDataSize;
         result = RegEnumValue(
             hKey,
             dwIndex,
@@ -235,4 +254,5 @@ System::Void Window::regTree_BeforeExpand(System::Object ^sender, System::Window
 
 System::Void Window::regTree_AfterSelect(System::Object ^sender, System::Windows::Forms::TreeViewEventArgs ^e) {
     PopulateValues(e->Node);
+    regValues->Sort();
 }
