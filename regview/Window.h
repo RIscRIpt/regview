@@ -3,11 +3,13 @@
 namespace regview {
 
 	using namespace System;
+	using namespace System::Linq;
 	using namespace System::ComponentModel;
 	using namespace System::Collections;
 	using namespace System::Collections::Generic;
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
+	using namespace System::Data::Linq;
 	using namespace System::Drawing;
     using namespace System::Runtime::InteropServices;
 
@@ -71,14 +73,16 @@ namespace regview {
     protected:
 
 	private:
-        HKEY OpenKeyByNode(TreeNode ^node);
+        HKEY OpenKeyByNode(TreeNode ^node, REGSAM access);
         void CloseKey(HKEY key);
 
         void PopulateRoots();
         void PopulateChildren(TreeNode ^rootNode);
+        void PopulateChildren(HashSet<String^> ^dest, HKEY hKey);
 
         void PopulateValues(TreeNode ^node);
-        void PopulateValue(String ^name, String ^type, String ^data);
+        void PopulateValues(Dictionary<String^, ListViewItem^> ^dest, HKEY hKey);
+        void PopulateValue(Dictionary<String^, ListViewItem^> ^dest, String ^name, String ^type, String ^data);
         String^ RegTypeToString(DWORD type);
         String^ RegDataToString(DWORD type, BYTE *data, SIZE_T length);
 

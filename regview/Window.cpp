@@ -21,7 +21,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return 0;
 }
 
-HKEY Window::OpenKeyByNode(TreeNode ^node) {
+HKEY Window::OpenKeyByNode(TreeNode ^node, REGSAM access) {
     LONG result;
     HKEY root, hKey;
     String ^path;
@@ -31,7 +31,7 @@ HKEY Window::OpenKeyByNode(TreeNode ^node) {
         root,
         wcsPath,
         0,
-        KEY_ALL_ACCESS,
+        access,
         &hKey
     );
     if(result != ERROR_SUCCESS) {
@@ -53,12 +53,26 @@ void Window::PopulateRoots() {
 }
 
 void Window::PopulateChildren(TreeNode ^rootNode) {
-    LONG result;
-    HKEY hKey = OpenKeyByNode(rootNode);
-    if(hKey == nullptr) {
+    HKEY hKey32 = OpenKeyByNode(rootNode, KEY_ALL_ACCESS | KEY_WOW64_32KEY);
+    if(hKey32 == nullptr) {
+        return;
+    }
+    HKEY hKey64 = OpenKeyByNode(rootNode, KEY_ALL_ACCESS | KEY_WOW64_64KEY);
+    if(hKey64 == nullptr) {
         return;
     }
 
+    auto set = gcnew HashSet<String^>();
+    PopulateChildren(set, hKey32);
+    PopulateChildren(set, hKey64);
+
+    for each(String ^key in set) {
+        rootNode->Nodes->Add(key);
+    }
+}
+
+void Window::PopulateChildren(HashSet<String^> ^dest, HKEY hKey) {
+    LONG result;
     DWORD nbSubKeys = 0;
     DWORD maxSubKeyNameLen = 0;
     result = RegQueryInfoKey(
@@ -94,7 +108,7 @@ void Window::PopulateChildren(TreeNode ^rootNode) {
         );
         switch(result) {
         case ERROR_SUCCESS:
-            rootNode->Nodes->Add(gcnew String(subKeyName, 0, subKeyNameLen));
+            dest->Add(gcnew String(subKeyName, 0, subKeyNameLen));
             break;
         case ERROR_NO_MORE_ITEMS:
             dwIndex = nbSubKeys;
@@ -108,13 +122,28 @@ close_key:
 }
 
 void Window::PopulateValues(TreeNode ^node) {
-    LONG result;
-    HKEY hKey = OpenKeyByNode(node);
-    if(hKey == nullptr) {
+    regValues->Items->Clear();
+
+    HKEY hKey32 = OpenKeyByNode(node, KEY_ALL_ACCESS | KEY_WOW64_32KEY);
+    if(hKey32 == nullptr) {
         return;
     }
+    HKEY hKey64 = OpenKeyByNode(node, KEY_ALL_ACCESS | KEY_WOW64_64KEY);
+    if(hKey64 == nullptr) {
+        return;
+    }
+    
+    auto set = gcnew Dictionary<String^, ListViewItem^>();
+    PopulateValues(set, hKey32);
+    PopulateValues(set, hKey64);
 
-    regValues->Items->Clear();
+    for each(auto item in set) {
+        regValues->Items->Add(item.Value);
+    }
+}
+
+void Window::PopulateValues(Dictionary<String^, ListViewItem^> ^dest, HKEY hKey) {
+    LONG result;
 
     const int maxNameSize = 1024;
     const int maxDataSize = 1024;
@@ -158,6 +187,7 @@ void Window::PopulateValues(TreeNode ^node) {
         switch(result) {
         case ERROR_SUCCESS:
             PopulateValue(
+                dest,
                 gcnew String(name, 0, nameLength),
                 RegTypeToString(type),
                 RegDataToString(type, dataBuffer, dataBufferSize)
@@ -172,11 +202,11 @@ break_for:
     CloseKey(hKey);
 }
 
-void Window::PopulateValue(String ^name, String ^type, String ^data) {
+void Window::PopulateValue(Dictionary<String^, ListViewItem^> ^dest, String ^name, String ^type, String ^data) {
     ListViewItem ^row = gcnew ListViewItem(name);
     row->SubItems->Add(type);
     row->SubItems->Add(data);
-    regValues->Items->Add(row);
+    dest[name] = row;
 }
 
 String^ Window::RegTypeToString(DWORD type) {
